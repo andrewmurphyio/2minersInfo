@@ -186,9 +186,9 @@ class TwoMinersInfoSensor(Entity):
                         '%d-%m-%Y %H:%M')
                 if len(r4['ethereum']):
                     self._single_coin_in_local_currency = r4['ethereum'][self.local_currency]
-                    calculate_unpaid = self._unpaid/1000000000000000000 * self._single_coin_in_local_currency
+                    calculate_unpaid = self._unpaid/1000000000 * self._single_coin_in_local_currency
                     self._unpaid_in_local_currency = round(calculate_unpaid,2)
-                    calculate_paid = self._paid/1000000000000000000 * self._single_coin_in_local_currency
+                    calculate_paid = self._paid/1000000000 * self._single_coin_in_local_currency
                     self._paid_in_local_currency = round(calculate_paid,2)
             else:
                 raise ValueError()
