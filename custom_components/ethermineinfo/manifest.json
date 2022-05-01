@@ -1,11 +1,11 @@
 {
-  "domain": "ethermineinfo",
-  "name": "EthermineInfo",
+  "domain": "2minersinfo",
+  "name": "2minersInfo",
   "version": "0.0.1",
-  "documentation": "https://github.com/ThomasPrior/EthermineInfo",
+  "documentation": "https://github.com/andrewmurphyio/home-assisstant-eth-2miners",
   "dependencies": [],
-  "codeowners": ["@thomasprior"],
+  "codeowners": ["@andrewmurphyio"],
   "requirements": [],
   "iot_class": "cloud_polling",
-  "issue_tracker": "https://github.com/ThomasPrior/EthermineInfo/issues"
+  "issue_tracker": "https://github.com/andrewmurphyio/home-assisstant-eth-2miners"
 }

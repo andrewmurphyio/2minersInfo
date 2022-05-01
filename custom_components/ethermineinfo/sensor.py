@@ -13,7 +13,7 @@ from .const import (
     CONF_UPDATE_FREQUENCY,
     CONF_NAME_OVERRIDE,
     SENSOR_PREFIX,
-    ETHERMINE_API_ENDPOINT,
+    TWOMINERS_API_ENDPOINT,
     COINGECKO_API_ENDPOINT,
     ATTR_ACTIVE_WORKERS,
     ATTR_CURRENT_HASHRATE,
@@ -23,15 +23,11 @@ from .const import (
     ATTR_STALE_SHARES,
     ATTR_UNPAID,
     ATTR_VALID_SHARES,
-    ATTR_START_BLOCK,
-    ATTR_END_BLOCK,
     ATTR_AMOUNT,
     ATTR_TXHASH,
     ATTR_PAID_ON,
-    ATTR_AVERAGE_HASHRATE_24h,
     ATTR_SINGLE_COIN_LOCAL_CURRENCY,
     ATTR_TOTAL_UNPAID_LOCAL_CURRENCY,
-    ATTR_COINS_PER_MINUTE,
     ATTR_CURRENT_HASHRATE_MH_SEC
 )
 
@@ -53,7 +49,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 
 
 def setup_platform(hass, config, add_entities, discovery_info=None):
-    _LOGGER.debug("Setup EthermineInfo sensor")
+    _LOGGER.debug("Setup 2minersInfo sensor")
 
     id_name = config.get(CONF_ID)
     miner_address = config.get(CONF_MINER_ADDRESS).strip()
@@ -65,7 +61,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
 
     try:
         entities.append(
-            EthermineInfoSensor(
+            TwoMinersInfoSensor(
                 miner_address, local_currency, update_frequency, id_name, name_override
             )
         )
@@ -76,7 +72,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     add_entities(entities)
 
 
-class EthermineInfoSensor(Entity):
+class TwoMinersInfoSensor(Entity):
     def __init__(
             self, miner_address, local_currency, update_frequency, id_name, name_override
     ):
@@ -99,15 +95,11 @@ class EthermineInfoSensor(Entity):
         self._unpaid = None
         self._valid_shares = None
         self._unit_of_measurement = "\u200b"
-        self._start_block = None
-        self._end_block = None
         self._amount = None
         self._txhash = None
         self._paid_on = None
-        self._average_hashrate_24h = None
         self._single_coin_in_local_currency = None
         self._unpaid_in_local_currency = None
-        self._coins_per_minute = None
         self._current_hashrate_mh_sec = None
 
 
@@ -132,30 +124,17 @@ class EthermineInfoSensor(Entity):
         return {ATTR_ACTIVE_WORKERS: self._active_workers, ATTR_CURRENT_HASHRATE: self._current_hashrate,
                 ATTR_INVALID_SHARES: self._invalid_shares, ATTR_LAST_UPDATE: self._last_update,
                 ATTR_REPORTED_HASHRATE: self._reported_hashrate, ATTR_STALE_SHARES: self._stale_shares,
-                ATTR_UNPAID: self._unpaid, ATTR_VALID_SHARES: self._valid_shares, ATTR_START_BLOCK: self._start_block,
-                ATTR_END_BLOCK: self._end_block, ATTR_AMOUNT: self._amount, ATTR_TXHASH: self._txhash,
-                ATTR_PAID_ON: self._paid_on, ATTR_AVERAGE_HASHRATE_24h: self._average_hashrate_24h,
+                ATTR_UNPAID: self._unpaid, ATTR_VALID_SHARES: self._valid_shares,
+                ATTR_AMOUNT: self._amount, ATTR_TXHASH: self._txhash,
+                ATTR_PAID_ON: self._paid_on, 
                 ATTR_SINGLE_COIN_LOCAL_CURRENCY: self._single_coin_in_local_currency,
                 ATTR_TOTAL_UNPAID_LOCAL_CURRENCY: self._unpaid_in_local_currency,
-                ATTR_CURRENT_HASHRATE_MH_SEC: self._current_hashrate_mh_sec,
-                ATTR_COINS_PER_MINUTE: self._coins_per_minute }
+                ATTR_CURRENT_HASHRATE_MH_SEC: self._current_hashrate_mh_sec }
 
     def _update(self):
-        dashboardurl = (
-                ETHERMINE_API_ENDPOINT
+        accounts_url = (
+                TWOMINERS_API_ENDPOINT
                 + self.miner_address
-                + "/dashboard"
-        )
-        payouturl = (
-                ETHERMINE_API_ENDPOINT
-                + self.miner_address
-                + "/payouts"
-        )
-
-        currentstatsurl = (
-                ETHERMINE_API_ENDPOINT
-                + self.miner_address
-                + "/currentStats"
         )
 
         coingeckourl = (
@@ -163,55 +142,37 @@ class EthermineInfoSensor(Entity):
                 + self.local_currency
         )
 
-        # sending get request to Ethermine dashboard endpoint
-        r = requests.get(dashboardurl).json()
+        # sending get request to 2miners dashboard endpoint
+        r = requests.get(accounts_url).json()
         # extracting response json
         self.data = r
-        dashboarddata = self.data
-
-        # sending get request to Ethermine payout endpoint
-        r2 = requests.get(payouturl).json()
-        # extracting response json
-        self.data2 = r2
-        payoutdata = self.data2
-
-        # sending get request to Ethermine currentstats endpoint
-        r3 = requests.get(currentstatsurl).json()
-        # extracting response json
-        self.data3 = r3
-        currentstatsdata = self.data3
-
+        
         # sending get request to Congecko API endpoint
         r4 = requests.get(url=coingeckourl).json()
         # extracting response json
         self.data4 = r4
-        coingeckodata = self.data4
-
+        
         try:
-            if len(r['data']['workers']) == 0:
+            if len(r['workers']) == 0:
                 raise ValueError()
-            if len(r['data']['workers']) >= 1:
+            if len(r['workers']) >= 1:
                 # Set the values of the sensor
                 self._last_update = datetime.today().strftime("%d-%m-%Y %H:%M")
-                self._state = r['data']['currentStatistics']['activeWorkers']
+                self._state = r['workersOnline']
                 # set the attributes of the sensor
-                self._active_workers = r['data']['currentStatistics']['activeWorkers']
-                self._current_hashrate = r['data']['currentStatistics']['currentHashrate']
-                self._invalid_shares = r['data']['currentStatistics']['invalidShares']
-                self._reported_hashrate = r['data']['currentStatistics']['reportedHashrate']
-                self._stale_shares = r['data']['currentStatistics']['staleShares']
-                self._unpaid = r['data']['currentStatistics']['unpaid']
-                self._valid_shares = r['data']['currentStatistics']['validShares']
-                self._average_hashrate_24h = r3['data']['averageHashrate']
-                self._coins_per_minute = '{:.20f}'.format(r3['data']['coinsPerMin'])
+                self._active_workers = r['workersOnline']
+                self._current_hashrate = r['currentHashrate']
+                self._invalid_shares = r['sharesInvalid']
+                self._reported_hashrate = r['hashrate']
+                self._stale_shares = r['sharesStale']
+                self._unpaid = r['stats']['balance']
+                self._valid_shares = r['sharesValid']
                 calculate_hashrate_mh_sec = self._current_hashrate / 1000000
                 self._current_hashrate_mh_sec = round(calculate_hashrate_mh_sec, 2)
-                if len(r2['data']):
-                    self._start_block = r2['data'][0]['start']
-                    self._end_block = r2['data'][0]['end']
-                    self._amount = r2['data'][0]['amount']
-                    self._txhash = r2['data'][0]['txHash']
-                    self._paid_on = datetime.fromtimestamp(int(r2['data'][0]['paidOn'])).strftime(
+                if len(r['payments']):
+                    self._amount = r['payments'][0]['amount']
+                    self._txhash = r['payments'][0]['tx']
+                    self._paid_on = datetime.fromtimestamp(int(r['payments'][0]['timestamp'])).strftime(
                         '%d-%m-%Y %H:%M')
                 if len(r4['ethereum']):
                     self._single_coin_in_local_currency = r4['ethereum'][self.local_currency]
