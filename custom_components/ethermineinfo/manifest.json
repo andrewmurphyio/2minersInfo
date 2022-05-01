@@ -1,7 +1,7 @@
 {
   "domain": "2minersInfo",
   "name": "2minersInfo",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "documentation": "https://github.com/andrewmurphyio/home-assisstant-eth-2miners",
   "dependencies": [],
   "codeowners": ["@andrewmurphyio"],

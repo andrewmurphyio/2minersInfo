@@ -136,11 +136,13 @@ class TwoMinersInfoSensor(Entity):
                 TWOMINERS_API_ENDPOINT
                 + self.miner_address
         )
+        _LOGGER.debug("Getting " + accounts_url)
 
         coingeckourl = (
                 COINGECKO_API_ENDPOINT
                 + self.local_currency
         )
+        _LOGGER.debug("Getting " + coingeckourl)
 
         # sending get request to 2miners dashboard endpoint
         r = requests.get(accounts_url).json()
