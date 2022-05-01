@@ -142,17 +142,17 @@ class TwoMinersInfoSensor(Entity):
                 + self.local_currency
         )
 
-        _LOGGER.warning("Getting " + accounts_url)
+        #_LOGGER.warning("Getting " + accounts_url)
         # sending get request to 2miners dashboard endpoint
         r = requests.get(accounts_url).json()
-        _LOGGER.warning("Got " + r)
+        #_LOGGER.warning("Got " + r)
         # extracting response json
         self.data = r
         
-        _LOGGER.warning("Getting " + coingeckourl)
+        #_LOGGER.warning("Getting " + coingeckourl)
         # sending get request to Congecko API endpoint
         r4 = requests.get(url=coingeckourl).json()
-        _LOGGER.warning("Got " + r4)
+        #_LOGGER.warning("Got " + r4)
         # extracting response json
         self.data4 = r4
         
