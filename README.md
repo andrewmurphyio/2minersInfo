@@ -60,7 +60,7 @@ Before downloading and configuring 2minersInfo, please ensure you are familiar w
 
 ## Installation
 
-Copy the files in the /custom_components/2minersinfo/ folder to: [homeassistant]/config/custom_components/2minersinfo/
+Copy the files in the /custom_components/2minersInfo/ folder to: [homeassistant]/config/custom_components/2minersInfo/
 
 HACS users, you know what to do!
 In case you don't:
@@ -77,7 +77,7 @@ In case you don't:
 To use 2minersInfo, please add the following items to your HomeAssistant ```configuration.yaml```
 ````
 sensor:
-  - platform: 2minersinfo
+  - platform: 2minersInfo
     miner_address: (required) the address of your 2miners miner
     currency_name: (required) the currency you would like your unpaid balance to be converted to 
     name_override: (optional) name to identify your wallet instead of your miner address.
@@ -94,21 +94,21 @@ Examples:
 
 ```
 sensor:
-  - platform: 2minersinfo
+  - platform: 2minersInfo
     miner_address: "0x1234567890123456789012345678901234567890"
     currency_name: USD
 ```
 
 ```
 sensor:
-  - platform: 2minersinfo
+  - platform: 2minersInfo
     miner_address: "1234567890123456789012345678901234567890"
     currency_name: USD
 ```
 
 ```
 sensor:
-  - platform: 2minersinfo
+  - platform: 2minersInfo
     miner_address: "1234567890123456789012345678901234567890"
     currency_name: USD
     name_override: "wallet name"
@@ -121,13 +121,13 @@ Multiple addresses can be configured.
 You can create a template sensor for any of the attributes returned by 2minersInfo. For example:
 
 Stale shares:
-```{{ states.sensor.2minersinfo_miner_address.attributes['stale_shares'] }}```
+```{{ states.sensor.2minersInfo_miner_address.attributes['stale_shares'] }}```
 
 Current hashrate:
-```{{ states.sensor.2minersinfo_miner_address.attributes['current_hashrate'] }}```
+```{{ states.sensor.2minersInfo_miner_address.attributes['current_hashrate'] }}```
 
 Unpaid amount:
-```{{ states.sensor.2minersinfo_miner_address.attributes['unpaid'] }}```
+```{{ states.sensor.2minersInfo_miner_address.attributes['unpaid'] }}```
 
 ## How does it look?
 
@@ -139,9 +139,7 @@ Some rather pretty graphs are possible with the [mini-graph-card](https://github
 
 ## Discussion
 
-[Talk about 2minersInfo here](https://community.home-assistant.io/t/my-first-custom-component-2minersinfo/302734)
-
-[Post issues with 2minersInfo here](https://github.com/ThomasPrior/2minersInfo/issues)
+[Post issues with 2minersInfo here](https://github.com/ThomasPriorandrewmurphyio/2minersInfo/issues)
 
 Issues should be posted with logs and relevant, redacted excerpts from your configuration.yaml file to ensure that help can be given most effectively.
 
