@@ -22,12 +22,14 @@ from .const import (
     ATTR_REPORTED_HASHRATE,
     ATTR_STALE_SHARES,
     ATTR_UNPAID,
+    ATTR_PAID,
     ATTR_VALID_SHARES,
     ATTR_AMOUNT,
     ATTR_TXHASH,
     ATTR_PAID_ON,
     ATTR_SINGLE_COIN_LOCAL_CURRENCY,
     ATTR_TOTAL_UNPAID_LOCAL_CURRENCY,
+    ATTR_TOTAL_PAID_LOCAL_CURRENCY,
     ATTR_CURRENT_HASHRATE_MH_SEC
 )
 
@@ -93,6 +95,7 @@ class TwoMinersInfoSensor(Entity):
         self._reported_hashrate = None
         self._stale_shares = None
         self._unpaid = None
+        self._paid = None
         self._valid_shares = None
         self._unit_of_measurement = "\u200b"
         self._amount = None
@@ -100,6 +103,7 @@ class TwoMinersInfoSensor(Entity):
         self._paid_on = None
         self._single_coin_in_local_currency = None
         self._unpaid_in_local_currency = None
+        self._paid_in_local_currency = None
         self._current_hashrate_mh_sec = None
 
 
@@ -124,11 +128,12 @@ class TwoMinersInfoSensor(Entity):
         return {ATTR_ACTIVE_WORKERS: self._active_workers, ATTR_CURRENT_HASHRATE: self._current_hashrate,
                 ATTR_INVALID_SHARES: self._invalid_shares, ATTR_LAST_UPDATE: self._last_update,
                 ATTR_REPORTED_HASHRATE: self._reported_hashrate, ATTR_STALE_SHARES: self._stale_shares,
-                ATTR_UNPAID: self._unpaid, ATTR_VALID_SHARES: self._valid_shares,
+                ATTR_UNPAID: self._unpaid, ATTR_PAID: self._paid, ATTR_VALID_SHARES: self._valid_shares,
                 ATTR_AMOUNT: self._amount, ATTR_TXHASH: self._txhash,
                 ATTR_PAID_ON: self._paid_on, 
                 ATTR_SINGLE_COIN_LOCAL_CURRENCY: self._single_coin_in_local_currency,
                 ATTR_TOTAL_UNPAID_LOCAL_CURRENCY: self._unpaid_in_local_currency,
+                ATTR_TOTAL_PAID_LOCAL_CURRENCY: self._paid_in_local_currency,
                 ATTR_CURRENT_HASHRATE_MH_SEC: self._current_hashrate_mh_sec }
 
     def _update(self):
@@ -149,7 +154,7 @@ class TwoMinersInfoSensor(Entity):
         # extracting response json
         self.data = r
         
-        #_LOGGER.warning("Getting " + coingeckourl)
+        _LOGGER.warning("Getting " + coingeckourl)
         # sending get request to Congecko API endpoint
         r4 = requests.get(url=coingeckourl).json()
         #_LOGGER.warning("Got " + r4)
@@ -169,12 +174,13 @@ class TwoMinersInfoSensor(Entity):
                 self._invalid_shares = r['sharesInvalid']
                 self._reported_hashrate = r['hashrate']
                 self._stale_shares = r['sharesStale']
-                self._unpaid = r['stats']['balance']
+                self._unpaid = r['stats']['balance'] / 1000000000
+                self._paid = r['stats']['paid'] / 1000000000
                 self._valid_shares = r['sharesValid']
                 calculate_hashrate_mh_sec = self._current_hashrate / 1000000
                 self._current_hashrate_mh_sec = round(calculate_hashrate_mh_sec, 2)
                 if len(r['payments']):
-                    self._amount = r['payments'][0]['amount']
+                    self._amount = r['payments'][0]['amount'] / 1000000000
                     self._txhash = r['payments'][0]['tx']
                     self._paid_on = datetime.fromtimestamp(int(r['payments'][0]['timestamp'])).strftime(
                         '%d-%m-%Y %H:%M')
@@ -182,6 +188,8 @@ class TwoMinersInfoSensor(Entity):
                     self._single_coin_in_local_currency = r4['ethereum'][self.local_currency]
                     calculate_unpaid = self._unpaid/1000000000000000000 * self._single_coin_in_local_currency
                     self._unpaid_in_local_currency = round(calculate_unpaid,2)
+                    calculate_paid = self._paid/1000000000000000000 * self._single_coin_in_local_currency
+                    self._paid_in_local_currency = round(calculate_paid,2)
             else:
                 raise ValueError()
 
